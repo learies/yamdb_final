@@ -1,5 +1,7 @@
 # REST API for YaMDb
 
+![example event parameter](https://github.com/learies/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg?event=push)
+
 Current library is REST API for YaMDb service which provides access for reading, creating and editing reviews for the following categories:
 
 - Films;
