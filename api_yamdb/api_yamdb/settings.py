@@ -1,17 +1,19 @@
 import os
 from datetime import timedelta
 
+from django.core.management.utils import get_random_secret_key
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'SUP3R-S3CR3T-K3Y-F0R-MY-PR0J3CT')
+SECRET_KEY = os.getenv('SECRET_KEY') or get_random_secret_key()
 
 DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = os.getenv('HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',

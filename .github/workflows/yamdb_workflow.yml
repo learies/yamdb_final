@@ -61,7 +61,6 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            ls -la
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/api_yamdb:v1
             sudo docker-compose stop
             sudo docker-compose rm web
