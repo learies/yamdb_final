@@ -1,50 +1,91 @@
-# REST API for YaMDb
+# REST API для сервиса YaMDb
 
 ![example event parameter](https://github.com/learies/yamdb_final/actions/workflows/yamdb_workflow.yml/badge.svg?event=push)
 
-Current library is REST API for YaMDb service which provides access for reading, creating and editing reviews for the following categories:
+REST API проект для сервиса YaMDb — собирает отзывы пользователей на произведения.
+Произведения делятся на категории. Список категорий может быть расширен администратором.
 
-- Films;
-- Books;
-- Music;
-- and other...
+Пример категорий:
+- Фильмы;
+- Книги;
+- Музыка;
+- и другие ...
 
-## Installation
+Например, в категории «Книги» могут быть произведения «Винни-Пух и все-все-все» и «Марсианские хроники», а в категории «Музыка» — песня «Давеча» группы «Насекомые» и вторая сюита Баха.
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install requirements.
+Произведению может быть присвоен жанр из списка предустановленных (например, «Сказка», «Рок» или «Артхаус»). Новые жанры может создавать только администратор.
 
+Благодарные или возмущённые пользователи оставляют к произведениям текстовые отзывы и ставят произведению оценку в диапазоне от одного до десяти из пользовательских оценок формируется усреднённая оценка произведения — рейтинг. На одно произведение пользователь может оставить только один отзыв.
+
+Сами произведения в YaMDb не хранятся
+
+## Пользовательские роли
+- **Аноним** — может просматривать описания произведений, читать отзывы и комментарии.
+- **Аутентифицированный пользователь (user)** — может читать всё, как и Аноним, может публиковать отзывы и ставить оценки произведениям (фильмам/книгам/песенкам), может комментировать отзывы; может редактировать и удалять свои отзывы и комментарии, редактировать свои оценки произведений. Эта роль присваивается по умолчанию каждому новому пользователю.
+- **Модератор (moderator)** — те же права, что и у Аутентифицированного пользователя, плюс право удалять и редактировать любые отзывы и комментарии.
+- **Администратор (admin)** — полные права на управление всем контентом проекта. Может создавать и удалять произведения, категории и жанры. Может назначать роли пользователям.
+- **Суперюзер Django** должен всегда обладать правами администратора, пользователя с правами admin. Даже если изменить пользовательскую роль суперюзера — это не лишит его прав администратора. Суперюзер — всегда администратор, но администратор — не обязательно суперюзер.
+
+## Регистрация новых пользователей
+1. Пользователь отправляет POST-запрос с параметрами email и username на эндпоинт `/api/v1/auth/signup/`
+2. Сервис YaMDB отправляет письмо с кодом подтверждения (confirmation_code) на указанный адрес email.
+3. Пользователь отправляет POST-запрос с параметрами username и confirmation_code на эндпоинт `/api/v1/auth/token/`, в ответе на запрос ему приходит token (JWT-токен).
+
+В результате пользователь получает токен и может работать с API проекта, отправляя этот токен с каждым запросом.
+После регистрации и получения токена пользователь может отправить PATCH-запрос на эндпоинт `/api/v1/users/me/` и заполнить поля в своём профайле (описание полей — в документации).
+
+## Ресурсы API YaMDb
+- **auth**: аутентификация.
+- **users**: пользователи.
+- **titles**: произведения, к которым пишут отзывы (определённый фильм, книга или песенка).
+- **categories**: категории (типы) произведений («Фильмы», «Книги», «Музыка»).
+- **genres**: жанры произведений. Одно произведение может быть привязано к нескольким жанрам.
+- **reviews**: отзывы на произведения. Отзыв привязан к определённому произведению.
+- **comments**: комментарии к отзывам. Комментарий привязан к определённому отзыву.
+
+# Связанные данные и каскадное удаление
+- При удалении объекта пользователя User должны удаляться все отзывы и комментарии этого пользователя (вместе с оценками-рейтингами).
+- При удалении объекта произведения Title должны удаляться все отзывы к этому произведению и комментарии к ним.
+- При удалении объекта отзыва Review должны быть удалены все комментарии к этому отзыву.
+- При удалении объекта категории Category не нужно удалять связанные с этой категорией произведения.
+- При удалении объекта жанра Genre не нужно удалять связанные с этим жанром произведения.
+
+## Установка
+
+### Клонирование репозитория
 ```bash
-pip install -r requirements.txt
+$ git clone git@github.com:learies/yamdb_final.git
 ```
-Make all necessary migrations:
+### Создать виртуальное окружение
 ```bash
-python manage.py makemigrations
-python manage.py migrate
+$ python3 -m venv venv
 ```
-
-Use management command for importing data from CSV file format into the SQLite data base:
+### Перейти в директорию проекта
 ```bash
-python script_db.py
+$ cd api_yamdb/
+```
+### Установить зависимости [pip](https://pip.pypa.io/en/stable/)
+```bash
+$ pip install -r requirements.txt
+```
+### Создать миграции
+```bash
+$ python manage.py makemigrations
+```
+```bash
+$ python manage.py migrate
+```
+### Заполнить db данными
+```bash
+$ python script_db.py
+```
+### Запустить сервер
+```bash
+$ python manage.py migrate
 ```
 
-## Resources
-
-- **auth**: authentication.
-- **users**: users.
-- **titles**: titles for reviews (particular film, book or song).
-- **categories**: categories (types) of titles (*Films, Books, Music*).
-- **genres**: genres of titles. One title may be connected to many genres.
-- **reviews**: reviews of titles. Review is connected to a particular title.
-- **comments**: comments on titles. Comments is connected to a particular review.
-
-## Usage
-
-Every resource is described in documentation: endpoints (address for making query), types of queries which are allowed, access rights and auxiliary parameters if it necessary.
-
-Get the entire description from the link below while your project is running:
-
-
-```python
+## Документация
+```
 http://127.0.0.1:8000/redoc/
 ```
 
