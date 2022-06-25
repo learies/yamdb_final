@@ -84,23 +84,40 @@ $ python script_db.py
 $ python manage.py migrate
 ```
 
+## cocker-compose
+### Перейти в директорию с файлом docker-compose.yaml:
+```bash
+$ cd infra
+```
+### Запустить
+```bash
+$ docker-compose up -d --build
+```
+
+### Выполнить миграции
+```bash
+$ docker-compose exec web python manage.py makemigrations
+$ docker-compose exec web python manage.py migrate
+```
+### Создаем суперпользователя
+```bash
+$ docker-compose exec web python manage.py createsuperuser 
+```
+### Собрать статику
+```bash
+$ docker-compose exec web python manage.py collectstatic --no-input
+```
+### Остановить контейнеры
+```bash
+$ docker-compose down -v
+```
 ## Документация
 ```
 http://127.0.0.1:8000/redoc/
 ```
-
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-## Authors :man_technologist:
-
-> [Alex](https://github.com/learies)
-
->[Sergey](https://github.com/SergoSolo)
-
-> [Artur](https://github.com/Archy-A)
-
+или
+```
+http://51.250.27.161/redoc/
+```
 ## License
 Free
